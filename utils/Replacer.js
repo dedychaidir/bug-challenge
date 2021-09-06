@@ -1,13 +1,14 @@
 const _ = require('lodash')
 
 const tag_cleaner = (tag, open_tag, close_tag) => tag.replace(open_tag, '').replace(close_tag, '')
+const petik = (tag, open_tag, close_tag) => tag.replace(open_tag, '\\').replace(close_tag, '\\')
 
-const tags = [ 
+const tags = [
     {
         tag: /\{\{(.*?)\}\}/g,
         open_tag: /^\{\{/,
         close_tag: /\}\}$/,
-        resolver: function(data) {
+        resolver: function (data) {
             return (tag) => _.get(data, tag_cleaner(tag, this.open_tag, this.close_tag))
         }
     }
@@ -24,6 +25,10 @@ const replace = (text, source_data = {}) => {
 
     tags.forEach(ftag => {
         new_text = new_text.replace(ftag.tag, ftag.resolver(source_data))
+        const tag = /".*?"/g;
+        if (new_text.match(tag)) {
+            new_text = new_text.replace(/"/g, `\\"`);
+        }
     })
 
     return new_text
